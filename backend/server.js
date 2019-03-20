@@ -1,45 +1,35 @@
-require("dotenv").config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const PORT = 5000;
+const { ApolloServer, gql } = require("apollo-server");
 
-const app = express();
+const question = "Which greeting do you prefer?";
+const answers = [
+  {
+    option: "Hi"
+  },
+  {
+    option: "why"
+  }
+];
 
-mongoose.Promise = global.Promise;
-mongoose
-  .connect(process.env.MLAB_URI, {
-    useNewUrlParser: true
-  })
-  .then(
-    () => {
-      console.log("Database is now connected");
-    },
-    err => {
-      console.log("Cannot connect to database + ", err);
-    }
-  );
+const typeDefs = gql`
+  type Answer {
+    option: String
+  }
 
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+  type Query {
+    question: String
+    answers: [Answer]
+  }
+`;
 
-app.use((err, req, res, next) => {
-  console.error(err);
-  return res.send({ error: err.message });
-});
+const resolvers = {
+  Query: {
+    answers: () => answers,
+    question: () => question
+  }
+};
 
-app.get("/", (req, res) => {
-  res.status(200);
-  res.send("Welcome to Voting App API Page");
-});
+const server = new ApolloServer({ typeDefs, resolvers });
 
-app.get("*", function(req, res) {
-  res.status(404);
-  res.send("Sorry the page you're looking for does not exist!");
-});
-
-app.listen(PORT, () => {
-  console.log("Server is running on PORT: ", PORT);
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
 });
