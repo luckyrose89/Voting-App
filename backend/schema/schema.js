@@ -54,6 +54,14 @@ const RootQuery = new GraphQLObjectType({
       resolve(parent, args) {
         return Poll.find();
       }
+    },
+
+    poll: {
+      type: QuestionType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return Poll.findById(args.id);
+      }
     }
   }
 });
@@ -74,6 +82,17 @@ const Mutation = new GraphQLObjectType({
           answer: args.input.answer
         });
         return poll.save();
+      }
+    },
+
+    deletePoll: {
+      type: QuestionType,
+      args: {
+        id: { type: GraphQLID }
+      },
+      resolve(parent, args) {
+        let poll = Poll.findByIdAndRemove(args.id);
+        return poll;
       }
     }
   }
