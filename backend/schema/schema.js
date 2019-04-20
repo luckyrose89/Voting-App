@@ -88,12 +88,18 @@ const Mutation = new GraphQLObjectType({
     deletePoll: {
       type: QuestionType,
       args: {
-        id: { type: GraphQLID }
+        id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent, args) {
         let poll = Poll.findByIdAndRemove(args.id);
         return poll;
       }
+    },
+
+    upvotePoll: {
+      type: QuestionType,
+      args: { id: { type: new GraphQLNonNull(GraphQLID) } },
+      resolve(parent, args) {}
     }
   }
 });
