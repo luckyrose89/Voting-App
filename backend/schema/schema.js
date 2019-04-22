@@ -1,5 +1,6 @@
 const graphql = require("graphql");
 const Poll = require("../models/poll");
+const Option = require("../models/pollOptions");
 
 const {
   GraphQLObjectType,
@@ -17,7 +18,8 @@ const AnswerType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     option: { type: GraphQLString },
-    votes: { type: GraphQLInt }
+    votes: { type: GraphQLInt },
+    pollId: { type: GraphQLID }
   })
 });
 
@@ -34,7 +36,8 @@ const AnswerTypeInput = new GraphQLInputObjectType({
   name: "AnswerInput",
   fields: () => ({
     option: { type: GraphQLString },
-    votes: { type: GraphQLInt }
+    votes: { type: GraphQLInt },
+    pollId: { type: new GraphQLNonNull(GraphQLID) }
   })
 });
 
