@@ -13,29 +13,40 @@ const {
   GraphQLNonNull
 } = graphql;
 
-const AnswerType = new GraphQLObjectType({
-  name: "Answer",
+const OptionType = new GraphQLObjectType({
+  name: "Option",
   fields: () => ({
     id: { type: GraphQLID },
     option: { type: GraphQLString },
     votes: { type: GraphQLInt },
-    pollId: { type: GraphQLID }
+    pollId: { type: GraphQLID },
+    poll: {
+      type: QuestionType,
+      resolve(parent, args) {
+        return Poll.findById(parent.pollId);
+      }
+    }
   })
 });
 
 const QuestionType = new GraphQLObjectType({
   name: "Question",
   fields: () => ({
-    id: { type: new GraphQLNonNull(GraphQLID) },
+    id: { type: GraphQLID },
     question: { type: GraphQLString },
-    answer: { type: GraphQLList(AnswerType) }
+    answer: {
+      type: GraphQLList(OptionType),
+      resolve(parent, args) {
+        return Option.find({ pollId: parent.id });
+      }
+    }
   })
 });
 
-const AnswerTypeInput = new GraphQLInputObjectType({
-  name: "AnswerInput",
+const OptionTypeInput = new GraphQLInputObjectType({
+  name: "OptionInput",
   fields: () => ({
-    option: { type: GraphQLString },
+    option: { type: new GraphQLNonNull(GraphQLString) },
     votes: { type: GraphQLInt },
     pollId: { type: new GraphQLNonNull(GraphQLID) }
   })
@@ -44,8 +55,7 @@ const AnswerTypeInput = new GraphQLInputObjectType({
 const QuestionTypeInput = new GraphQLInputObjectType({
   name: "QuestionInput",
   fields: () => ({
-    question: { type: new GraphQLNonNull(GraphQLString) },
-    answer: { type: new GraphQLNonNull(GraphQLList(AnswerTypeInput)) }
+    question: { type: new GraphQLNonNull(GraphQLString) }
   })
 });
 
@@ -72,7 +82,7 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: "Mutation",
   fields: {
-    addPoll: {
+    createPoll: {
       type: QuestionType,
       args: {
         input: {
@@ -81,17 +91,47 @@ const Mutation = new GraphQLObjectType({
       },
       resolve(parent, args) {
         let poll = new Poll({
-          question: args.input.question,
-          answer: args.input.answer
+          question: args.input.question
         });
+
         return poll.save();
       }
     },
 
-    deletePoll: {
+    createOption: {
+      type: OptionType,
+      args: {
+        input: {
+          type: new GraphQLNonNull(OptionTypeInput)
+        }
+      },
+      resolve(parent, args) {
+        let option = new Option({
+          option: args.input.option,
+          votes: 0,
+          pollId: args.input.pollId
+        });
+
+        return option.save();
+      }
+    },
+
+    upVote: {
+      type: OptionType,
+      args: {
+        id: { type: GraphQLID }
+      },
+      resolve(parent, args) {
+        let option = Option.findById(args.id);
+        option.votes += 1;
+        return option.save();
+      }
+    },
+
+    deleteQuestion: {
       type: QuestionType,
       args: {
-        id: { type: new GraphQLNonNull(GraphQLID) }
+        id: { type: GraphQLID }
       },
       resolve(parent, args) {
         let poll = Poll.findByIdAndRemove(args.id);
@@ -99,10 +139,15 @@ const Mutation = new GraphQLObjectType({
       }
     },
 
-    upvotePoll: {
-      type: QuestionType,
-      args: { id: { type: new GraphQLNonNull(GraphQLID) } },
-      resolve(parent, args) {}
+    deleteOption: {
+      type: OptionType,
+      args: {
+        id: { type: GraphQLID }
+      },
+      resolve(parent, args) {
+        let option = Option.findByIdAndRemove(args.id);
+        return option;
+      }
     }
   }
 });
