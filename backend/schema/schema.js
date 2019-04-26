@@ -46,9 +46,8 @@ const QuestionType = new GraphQLObjectType({
 const OptionTypeInput = new GraphQLInputObjectType({
   name: "OptionInput",
   fields: () => ({
-    option: { type: new GraphQLNonNull(GraphQLString) },
-    votes: { type: GraphQLInt },
-    pollId: { type: new GraphQLNonNull(GraphQLID) }
+    option: { type: GraphQLString },
+    pollId: { type: GraphQLID }
   })
 });
 
@@ -98,7 +97,7 @@ const Mutation = new GraphQLObjectType({
       }
     },
 
-    createOption: {
+    createPollOption: {
       type: OptionType,
       args: {
         input: {
