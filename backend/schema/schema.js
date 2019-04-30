@@ -46,8 +46,9 @@ const QuestionType = new GraphQLObjectType({
 const OptionTypeInput = new GraphQLInputObjectType({
   name: "OptionInput",
   fields: () => ({
-    option: { type: GraphQLString },
-    pollId: { type: GraphQLID }
+    option: { type: new GraphQLNonNull(GraphQLString) },
+    votes: { type: new GraphQLNonNull(GraphQLInt) },
+    pollId: { type: new GraphQLNonNull(GraphQLID) }
   })
 });
 
@@ -105,12 +106,12 @@ const Mutation = new GraphQLObjectType({
         }
       },
       resolve(parent, args) {
+        console.log(args);
         let option = new Option({
           option: args.input.option,
-          votes: 0,
+          votes: args.input.votes,
           pollId: args.input.pollId
         });
-
         return option.save();
       }
     },
