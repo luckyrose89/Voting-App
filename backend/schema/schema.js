@@ -121,8 +121,8 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLID }
       },
-      resolve(parent, args) {
-        let option = Option.findById(args.id);
+      async resolve(parent, args) {
+        let option = await Option.findById(args.id);
         option.votes += 1;
         return option.save();
       }
