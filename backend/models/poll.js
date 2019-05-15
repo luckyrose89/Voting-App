@@ -3,11 +3,13 @@ const Schema = mongoose.Schema;
 const Option = require("./pollOptions");
 
 const pollSchema = new Schema({
-  question: String
+  question: String,
+  user: Schema.Types.ObjectId
 });
 
-pollSchema.pre("remove", function(doc) {
-  Option.remove({ pollId: doc._id }).exec();
+pollSchema.post("remove", function(doc) {
+  console.log("fired");
+  Option.remove({ pollId: this._id }).exec();
 });
 
 module.exports = mongoose.model("Poll", pollSchema);
