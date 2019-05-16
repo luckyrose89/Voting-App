@@ -4,6 +4,8 @@ const graphqlHTTP = require("express-graphql");
 const schema = require("./schema/schema");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const Option = require("./models/pollOptions");
+const Poll = require("./models/poll");
 const PORT = 4000;
 
 mongoose.Promise = global.Promise;
@@ -26,10 +28,11 @@ const app = express();
 app.use(cors());
 app.use(
   "/graphql",
-  graphqlHTTP({
+  graphqlHTTP(req => ({
     schema,
+    context: { req, Poll, Option },
     graphiql: true
-  })
+  }))
 );
 
 app.listen(PORT, () => {
