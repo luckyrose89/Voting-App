@@ -121,8 +121,8 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLID }
       },
-      async resolve(parent, args) {
-        let option = await Option.findById(args.id);
+      async resolve(parent, args, ctx) {
+        let option = await ctx.models.Option.findById(args.id).exec();
         option.votes += 1;
         return option.save();
       }
@@ -133,9 +133,14 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLID }
       },
-      resolve(parent, args) {
-        let poll = Poll.findByIdAndRemove(args.id);
-        return poll;
+      async resolve(parent, args, ctx) {
+        await ctx.models.Option.remove({ pollId: args.id })
+          .exec()
+          .catch(err => console.error(`Error deleting poll options`, err));
+        const deletedPoll = await ctx.models.Poll.findByIdAndRemove(args.id)
+          .exec()
+          .catch(err => console.error(`Error deleting poll`, err));
+        return deletedPoll;
       }
     },
 
