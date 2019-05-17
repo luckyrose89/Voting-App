@@ -30,7 +30,6 @@ app.use(
   "/graphql",
   graphqlHTTP(req => ({
     schema,
-    context: { req, Poll, Option },
     graphiql: true
   }))
 );
