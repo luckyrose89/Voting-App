@@ -142,17 +142,6 @@ const Mutation = new GraphQLObjectType({
           .catch(err => console.error(`Error deleting poll`, err));
         return deletedPoll;
       }
-    },
-
-    deleteOption: {
-      type: OptionType,
-      args: {
-        id: { type: GraphQLID }
-      },
-      resolve(parent, args) {
-        let option = Option.findByIdAndRemove(args.id);
-        return option;
-      }
     }
   }
 });
