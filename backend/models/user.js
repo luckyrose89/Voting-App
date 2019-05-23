@@ -28,4 +28,28 @@ userSchema.methods.generateJWT = function() {
   );
 };
 
+userSchema.statics.upsertTwitterUser = async function({
+  accessToken,
+  refreshToken,
+  profile
+}) {
+  const User = this;
+
+  const user = await User.findOne({ "social.twitterProvider.id": profile.id });
+
+  // no user was found, lets create a new one
+  if (!user) {
+    const newUser = await User.create({
+      name: profile.displayName || `${profile.familyName} ${profile.givenName}`,
+      "social.twitterProvider": {
+        id: profile.id,
+        token: accessToken
+      }
+    });
+
+    return newUser;
+  }
+  return user;
+};
+
 module.exports = mongoose.model("User", userSchema);
