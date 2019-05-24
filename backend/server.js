@@ -4,8 +4,6 @@ const graphqlHTTP = require("express-graphql");
 const schema = require("./schema/schema");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const Option = require("./models/pollOptions");
-const Poll = require("./models/poll");
 const PORT = 4000;
 
 mongoose.Promise = global.Promise;
