@@ -1,40 +1,23 @@
-const passport = require("passport");
-var TwitterTokenStrategy = require("passport-twitter-token");
+var passport = require("passport"),
+  TwitterTokenStrategy = require("passport-twitter-token"),
+  User = require("./models/user");
 
-// TWITTER STRATEGY
-const TwitterTokenStrategyCallback = (
-  accessToken,
-  refreshToken,
-  profile,
-  done
-) =>
-  done(null, {
-    accessToken,
-    refreshToken,
-    profile
-  });
-
-passport.use(
-  new TwitterTokenStrategy(
-    {
-      clientID: "j4fSytOnp6A7PCnPVG1koBcZK ",
-      clientSecret: "IVBU1FmBQTh6FXxLGshwYkNlgIaFbG4uqJi7VyPlbLF6ihMAdg"
-    },
-    TwitterTokenStrategyCallback
-  )
-);
-
-// authenticate function
-const authenticateTwitter = (req, res) =>
-  new Promise((resolve, reject) => {
-    passport.authenticate(
-      "twitter-token",
-      { session: false },
-      (err, data, info) => {
-        if (err) reject(err);
-        resolve({ data, info });
+module.exports = function() {
+  passport.use(
+    new TwitterTokenStrategy(
+      {
+        consumerKey: "j4fSytOnp6A7PCnPVG1koBcZK",
+        consumerSecret: "IVBU1FmBQTh6FXxLGshwYkNlgIaFbG4uqJi7VyPlbLF6ihMAdg",
+        includeEmail: true
+      },
+      function(token, tokenSecret, profile, done) {
+        User.upsertTwitterUser(token, tokenSecret, profile, function(
+          err,
+          user
+        ) {
+          return done(err, user);
+        });
       }
-    )(req, res);
-  });
-
-module.exports = { authenticateTwitter };
+    )
+  );
+};
